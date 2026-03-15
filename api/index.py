@@ -45,28 +45,23 @@ def to_iso_duration(duration_str: str) -> str:
 
 # CRITICAL: Optimized yt-dlp options for Vercel
 def get_ydl_opts(is_meta=False):
-    opts = {
+    return {
         'quiet': True,
-        'no_warnings': True,
         'skip_download': True,
         'cachedir': False,
         'cookiefile': cookie_file,
         'nocheckcertificate': True,
-        # --- ADD THESE FOR SPEED ---
-        'extract_flat': True,       # Don't resolve URLs in playlists
-        'lazy_playlist': True,     # Only get what is needed
-        'youtube_include_dash_manifest': False, # Manifests take a long time to load
+        'ignoreerrors': True,
+        'no_warnings': True,
+        # --- THE SPEED TRICK ---
+        'extract_flat': True if is_meta else False,
+        'youtube_include_dash_manifest': False,
         'youtube_include_hls_manifest': False,
-        'no_color': True,
-        'socket_timeout': 5,       # Don't wait forever on a slow connection
-        # ---------------------------
-        'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        }
+        'format': 'ba/wa', # Extremely loose format selection
+        'extractor_args': {'youtube': {'skip': ['dash', 'hls']}}, # Skips heavy manifest parsing
+        'socket_timeout': 5,
     }
-    if not is_meta:
-        opts['format'] = 'wa*[vcodec=none]/ba*' # Specific filter for audio only
-    return opts
+
 
 
 def extract_info(url=None, search_query=None, is_meta=False):
