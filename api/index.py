@@ -49,18 +49,25 @@ def get_ydl_opts(is_meta=False):
         'quiet': True,
         'no_warnings': True,
         'skip_download': True,
-        'cachedir': False,  # MUST BE FALSE FOR VERCEL
+        'cachedir': False,
         'cookiefile': cookie_file,
         'nocheckcertificate': True,
-        'ignoreerrors': True,
-        'extract_flat': 'in_playlist' if not is_meta else True,
+        # --- ADD THESE FOR SPEED ---
+        'extract_flat': True,       # Don't resolve URLs in playlists
+        'lazy_playlist': True,     # Only get what is needed
+        'youtube_include_dash_manifest': False, # Manifests take a long time to load
+        'youtube_include_hls_manifest': False,
+        'no_color': True,
+        'socket_timeout': 5,       # Don't wait forever on a slow connection
+        # ---------------------------
         'http_headers': {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         }
     }
     if not is_meta:
-        opts['format'] = 'bestaudio/best' # Faster extraction for music bots
+        opts['format'] = 'wa*[vcodec=none]/ba*' # Specific filter for audio only
     return opts
+
 
 def extract_info(url=None, search_query=None, is_meta=False):
     ydl_opts = get_ydl_opts(is_meta)
